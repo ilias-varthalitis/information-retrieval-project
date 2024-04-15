@@ -1,6 +1,3 @@
-                      Information Retrieval project
-First member: Ilias Varthalitis, AM: 4637 Department of Computer Science & Engineering
-Second member: Aristeidis Panagiotou, AM: 4754 Department of Computer Science & Engineering
 
 INTRODUCTION:
 
