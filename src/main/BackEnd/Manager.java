@@ -8,15 +8,18 @@ public class Manager {
     private Searcher searcher;
 
     public Manager(String indexPath) throws IOException {
+        System.out.println(indexPath);
         this.indexer = new Indexer(indexPath);
-        this.searcher = new Searcher(indexPath);
+        //this.searcher = new Searcher(indexPath);
     }
 
     public void indexDocuments() throws IOException {
-        indexer.indexCSV("D:\\pitoura\\corpus.csv");
+        this.indexer.indexCSV("D:\\pitoura\\corpus.csv");
+        this.indexer.close();
     }
 
     public void search(String query) throws IOException, ParseException {
+        searcher = new Searcher("D:\\pitoura");
         searcher.search(query);
     }
 
