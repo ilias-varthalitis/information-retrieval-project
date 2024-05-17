@@ -61,16 +61,6 @@ public class Indexer {
     public void close() throws IOException {
         writer.close();
     }
-    public static void main(String[] args) {
-        try {
-            Indexer indexer = new Indexer("D:\\pitoura");
-            indexer.indexCSV("D:\\pitoura\\corpus.csv");
-            indexer.close();
-            System.out.println("Indexing completed successfully.");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 }
 
 

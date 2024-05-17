@@ -1,4 +1,5 @@
 import org.apache.lucene.analysis.*;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.highlight.*;
 import org.apache.lucene.index.*;
@@ -19,17 +20,24 @@ public class Searcher {
     public Searcher(String indexPath) throws IOException {
         searcher = new IndexSearcher(DirectoryReader.open(FSDirectory.open(Paths.get(indexPath))));
         String[] fields = {"title", "abstract", "full_text", "authors"};
-        parser = new MultiFieldQueryParser(fields, new StandardAnalyzer());
+
+        StandardAnalyzer analyzer = new StandardAnalyzer();
+        parser = new MultiFieldQueryParser(fields, analyzer);
     }
 
     public void search(String queryString) throws IOException, ParseException {
         Query query = parser.parse(queryString);
         TopDocs results = searcher.search(query, 10);
+        System.out.println("results " + results.totalHits);
         for (ScoreDoc hit : results.scoreDocs) {
             Document doc = searcher.doc(hit.doc);
+
+            int totalHits = (int) results.totalHits.value;
+            System.out.println("Total Hits: " + totalHits);
+
             System.out.println("Title: " + doc.get("title"));
             System.out.println("Abstract: " + doc.get("abstract"));
-            System.out.println("Full Text: " + doc.get("full_text"));
+            //System.out.println("Full Text: " + doc.get("full_text"));
             System.out.println("Authors: " + doc.get("authors"));
             System.out.println();
         }

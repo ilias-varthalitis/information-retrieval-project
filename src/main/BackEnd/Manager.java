@@ -12,11 +12,8 @@ public class Manager {
         this.searcher = new Searcher(indexPath);
     }
 
-    public void indexDocuments(List<Document> documents) throws IOException {
-        for (Document doc : documents) {
-            indexer.indexDocument(doc);
-        }
-        indexer.close();
+    public void indexDocuments() throws IOException {
+        indexer.indexCSV("D:\\pitoura\\corpus.csv");
     }
 
     public void search(String query) throws IOException, ParseException {
@@ -25,17 +22,12 @@ public class Manager {
 
     public static void main(String[] args) {
         try {
-            Manager manager = new Manager("path/to/index");
+            Manager manager = new Manager("D:\\pitoura");
 
-            // Δημιουργία και ευρετηρίαση εγγράφων
-            Document doc1 = new Document("Title1", "Abstract1", "Full text of document 1", "Author1");
-            Document doc2 = new Document("Title2", "Abstract2", "Full text of document 2", "Author2, Author3");
-            manager.indexDocuments(List.of(doc1, doc2));
+            manager.indexDocuments();
 
-            // Αναζήτηση εγγράφων
-            manager.search("document");
-            manager.search("title:Title1");
-            manager.search("authors:Author1");
+            manager.search("title:Algorithm");
+            //manager.search("authors:Author1");
 
         } catch (IOException | ParseException e) {
             e.printStackTrace();
