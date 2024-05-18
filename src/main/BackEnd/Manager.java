@@ -5,6 +5,7 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import javafx.scene.control.ListView;
 
 public class Manager {
     private Indexer indexer;
