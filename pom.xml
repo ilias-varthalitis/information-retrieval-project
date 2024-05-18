@@ -9,7 +9,9 @@
   <properties>
     <maven.compiler.source>15</maven.compiler.source>
     <maven.compiler.target>15</maven.compiler.target>
+    <javafx.version>17.0.1</javafx.version>
   </properties>
+
   <dependencies>
     <!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-core -->
     <dependency>
@@ -69,6 +71,49 @@
       <version>1.11.0</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <version>${javafx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-fxml</artifactId>
+      <version>${javafx.version}</version>
+    </dependency>
 
   </dependencies>
+
+  <build>
+    <plugins>
+      <!-- Maven Compiler Plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
+        <configuration>
+          <source>${maven.compiler.source}</source>
+          <target>${maven.compiler.target}</target>
+        </configuration>
+      </plugin>
+
+      <!-- JavaFX Maven Plugin -->
+      <plugin>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-maven-plugin</artifactId>
+        <version>0.0.8</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>compile</goal>
+              <goal>process-classes</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <mainClass>src.main.FrontEnd.gui</mainClass>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

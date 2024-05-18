@@ -1,3 +1,5 @@
+package BackEnd;
+
 public class Document {
     private String title;
     private String abstractText;

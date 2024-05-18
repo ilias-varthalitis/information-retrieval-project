@@ -1,5 +1,8 @@
+package BackEnd;
+
 import org.apache.lucene.queryparser.classic.ParseException;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -19,21 +22,32 @@ public class Manager {
     }
 
     public void search(String query) throws IOException, ParseException {
-        searcher = new Searcher("D:\\pitoura");
-        searcher.search(query);
+        this.searcher = new Searcher("D:\\pitoura\\index");
+        this.searcher.search(query);
     }
 
-    public static void main(String[] args) {
+    public void deleteIndexes(){
+        File indexDir = new File("D:\\pitoura\\index");
+        if (indexDir.exists()) {
+            for (File file : indexDir.listFiles()) {
+                file.delete();
+            }
+            indexDir.delete();
+        }
+    }
+
+    /*public static void main(String[] args) {
         try {
-            Manager manager = new Manager("D:\\pitoura");
+            Manager manager = new Manager("D:\\pitoura\\index");
 
             manager.indexDocuments();
 
-            manager.search("title:Algorithm");
-            //manager.search("authors:Author1");
+            manager.search("title: recipe");
+
+            manager.deleteIndexes();
 
         } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 }
