@@ -1,5 +1,6 @@
 package BackEnd;
 
+import lombok.Getter;
 import org.apache.lucene.queryparser.classic.ParseException;
 
 import java.io.File;
@@ -9,12 +10,13 @@ import javafx.scene.control.ListView;
 
 public class Manager {
     private Indexer indexer;
+    @Getter
     private Searcher searcher;
+
 
     public Manager(String indexPath) throws IOException {
         System.out.println(indexPath);
         this.indexer = new Indexer(indexPath);
-        //this.searcher = new Searcher(indexPath);
     }
 
     public void indexDocuments() throws IOException {

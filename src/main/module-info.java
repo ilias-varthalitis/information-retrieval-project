@@ -9,6 +9,7 @@ module information.retrieval.project {
     requires org.apache.lucene.grouping;
     requires com.opencsv;
     requires org.apache.commons.csv;
+    requires static lombok;
 
     opens FrontEnd to javafx.fxml;
     exports FrontEnd;

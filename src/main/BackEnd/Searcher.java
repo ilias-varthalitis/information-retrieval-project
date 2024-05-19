@@ -1,5 +1,6 @@
 package BackEnd;
 
+import lombok.Getter;
 import org.apache.lucene.analysis.*;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -23,10 +24,13 @@ import javafx.scene.control.ListView;
 public class Searcher {
     private IndexSearcher searcher;
     private QueryParser parser;
+    @Getter
+    private ArrayList<Document> myList;
 
     public Searcher(String indexPath) throws IOException {
+        myList = new ArrayList<Document>();
         searcher = new IndexSearcher(DirectoryReader.open(FSDirectory.open(Paths.get(indexPath))));
-        String[] fields = {"title", "abstract", "full_text", "authors"};
+        String[] fields = {"authors", "year" , "title", "abstract", "full_text"};
 
         StandardAnalyzer analyzer = new StandardAnalyzer();
         parser = new MultiFieldQueryParser(fields, analyzer);
@@ -39,12 +43,13 @@ public class Searcher {
         saveSearchToHistory(queryString, results.totalHits.value);
         for (ScoreDoc hit : results.scoreDocs) {
             Document doc = searcher.doc(hit.doc);
+            System.out.println("Authors: " + doc.get("authors"));
+            System.out.println("Year: " + doc.get("year"));
             System.out.println("Title: " + doc.get("title"));
             System.out.println("Abstract: " + doc.get("abstract"));
-            //System.out.println("Full Text: " + doc.get("full_text"));
-            System.out.println("Authors: " + doc.get("authors"));
-            System.out.println("Doc num: " + hit.doc);
+
             System.out.println();
+            myList.add(doc);
         }
     }
 

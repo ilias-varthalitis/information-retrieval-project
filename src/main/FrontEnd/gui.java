@@ -40,7 +40,7 @@ public class gui extends Application {
         ListView<String> resultsList = new ListView<>();
 
 
-        Manager manager = new Manager("D:\\pitoura");
+        Manager manager = new Manager(INDEX_DIR);
 
 
         searchButton.setOnAction(e -> {
@@ -50,7 +50,11 @@ public class gui extends Application {
 //                    searchIndex(queryString, resultsList);
                     manager.indexDocuments();
 
-                    manager.search("title: recipe");
+                    manager.search(queryString);
+                    for (Document doc : manager.getSearcher().getMyList()) {
+
+                        resultsList.getItems().add("Authors: "+doc.get("authors")+"\n"+"Year: "+doc.get("year")+"\n"+"Title: "+doc.get("title")+"\n"+"Abstract: "+doc.get("abstract"));
+                    }
 
                     manager.deleteIndexes();
                 } catch (Exception ex) {
@@ -63,32 +67,11 @@ public class gui extends Application {
         vbox.setPadding(new Insets(10));
         vbox.getChildren().addAll(new Label("Lucene Search"), searchField, searchButton, resultsList);
 
-        Scene scene = new Scene(vbox, 400, 300);
+        Scene scene = new Scene(vbox, 700, 600);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
-    private void searchIndex(String queryString, ListView<String> resultsList) throws Exception {
-        resultsList.getItems().clear();
-
-        try (FSDirectory dir = FSDirectory.open(Paths.get(INDEX_DIR));
-             IndexReader reader = DirectoryReader.open(dir)) {
-            IndexSearcher searcher = new IndexSearcher(reader);
-            StandardAnalyzer analyzer = new StandardAnalyzer();
-
-            QueryParser parser = new QueryParser("content", analyzer);
-            Query query = parser.parse(queryString);
-
-            TopDocs results = searcher.search(query, 10);
-            ScoreDoc[] hits = results.scoreDocs;
-
-            for (ScoreDoc hit : hits) {
-                Document doc = searcher.doc(hit.doc);
-                String content = doc.get("content");
-                resultsList.getItems().add(content);
-            }
-        }
-    }
 
     public static void main(String[] args) {
         launch(args);

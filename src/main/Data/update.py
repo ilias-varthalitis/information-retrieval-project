@@ -5,8 +5,12 @@ papers_df = pd.read_csv('papers.csv')
 authors_df = pd.read_csv('authors.csv')
 
 
-# filter rows that have not null 'abstract' field
-papers_df = papers_df[papers_df['abstract'].notna()]
+# filter rows that have not null fields
+papers_df = papers_df[papers_df['abstract'].notna() & papers_df['title'].notna() & papers_df['year'].notna() & papers_df['full_text'].notna()]
+
+
+papers_df = papers_df['source_id'].value_counts()[papers_df['source_id'].value_counts() == 1].index
+
 
 # Checking that we have at least 200 samples with not null "abstract" field
 if len(papers_df) < 200:

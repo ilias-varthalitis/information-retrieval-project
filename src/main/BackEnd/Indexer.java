@@ -39,10 +39,12 @@ public class Indexer {
 
     public void indexDocument(Document doc) throws IOException {
         org.apache.lucene.document.Document luceneDoc = new org.apache.lucene.document.Document();
+        luceneDoc.add(new TextField("authors", doc.getAuthors(), Field.Store.YES));
+        luceneDoc.add(new TextField("year", doc.getYear()/*Integer.toString(doc.getYear())*/, Field.Store.YES));
         luceneDoc.add(new TextField("title", doc.getTitle(), Field.Store.YES));
         luceneDoc.add(new TextField("abstract", doc.getAbstractText(), Field.Store.YES));
         luceneDoc.add(new TextField("full_text", doc.getFullText(), Field.Store.YES));
-        luceneDoc.add(new TextField("authors", doc.getAuthors(), Field.Store.YES));
+
         writer.addDocument(luceneDoc);
     }
 
@@ -50,11 +52,15 @@ public class Indexer {
         FileReader reader = new FileReader(csvFilePath);
         Iterable<CSVRecord> records = CSVFormat.DEFAULT.withHeader().parse(reader);
         for (CSVRecord record : records) {
+            //String year = record.get("year");
+            //year = String.valueOf(Integer.parseInt(year));
             Document doc = new Document(
+                    record.get("authors"),
+                    record.get("year"),
                     record.get("title"),
                     record.get("abstract"),
-                    record.get("full_text"),
-                    record.get("authors")
+                    record.get("full_text")
+
             );
             indexDocument(doc);
         }
