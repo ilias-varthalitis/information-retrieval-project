@@ -3,7 +3,7 @@ module information.retrieval.project {
     requires javafx.fxml;
 
     requires org.apache.lucene.core; // Use the inferred module name
-    //requires org.apache.lucene.analyzers.common;
+    requires org.apache.lucene.analysis.common;
     requires org.apache.lucene.queryparser;
     requires org.apache.lucene.highlighter;
     requires org.apache.lucene.grouping;
