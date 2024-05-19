@@ -2,8 +2,8 @@ package BackEnd;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
-import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
-import org.apache.lucene.analysis.synonym.SynonymFilterFactory;
+//import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
+//import org.apache.lucene.analysis.synonym.SynonymFilterFactory;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.*;
 import org.apache.lucene.store.*;

@@ -21,12 +21,12 @@
       <version>9.10.0</version>
     </dependency>
 
-    <!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-analyzers-common -->
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-analyzers-common</artifactId>
-      <version>8.11.3</version>
-    </dependency>
+<!--    &lt;!&ndash; https://mvnrepository.com/artifact/org.apache.lucene/lucene-analyzers-common &ndash;&gt;-->
+<!--    <dependency>-->
+<!--      <groupId>org.apache.lucene</groupId>-->
+<!--      <artifactId>lucene-analyzers-common</artifactId>-->
+<!--      <version>8.11.3</version>-->
+<!--    </dependency>-->
 
     <!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-queryparser -->
     <dependency>
@@ -75,12 +75,12 @@
     <dependency>
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-controls</artifactId>
-      <version>${javafx.version}</version>
+      <version>17.0.6</version>
     </dependency>
     <dependency>
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-fxml</artifactId>
-      <version>${javafx.version}</version>
+      <version>17.0.6</version>
     </dependency>
 
     <dependency>
@@ -201,7 +201,7 @@
             <!-- Default configuration for running with: mvn clean javafx:run -->
             <id>default-cli</id>
             <configuration>
-              <mainClass>com.example.demo/com.example.demo.HelloApplication</mainClass>
+              <mainClass>org.example.demo/org.example.demo.HelloApplication</mainClass>
               <launcher>app</launcher>
               <jlinkZipName>app</jlinkZipName>
               <jlinkImageName>app</jlinkImageName>
