@@ -15,7 +15,9 @@ import javafx.stage.Stage;
 import org.apache.lucene.document.Document;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import BackEnd.*;
 import org.apache.lucene.search.Query;
@@ -48,6 +50,8 @@ public class gui extends Application {
         });
 
         Button searchButton = new Button("Search");
+        Button sortAscButton = new Button("Sort by Year Ascending");
+        Button sortDescButton = new Button("Sort by Year Descending");
         ListView<VBox> resultsList = new ListView<>();
         Button prevButton = new Button("Previous");
         Button nextButton = new Button("Next");
@@ -56,40 +60,22 @@ public class gui extends Application {
         nextButton.setDisable(true);
 
         searchButton.setOnAction(e -> {
+            handleSearch(comboBox, searchField, resultsList, prevButton, nextButton);
+        });
 
-            switch (comboBox.getSelectionModel().getSelectedItem()) {
-                case "Keyword":
-                    queryString = searchField.getText();
-                    break;
-                case "Author":
-                    queryString = "author:" + searchField.getText();
-                    break;
-                case "Title":
-                    queryString = "title:" + searchField.getText();
-                    break;
-                case "Year":
-                    queryString = "year:" + searchField.getText();
-                    break;
-                case "Abstract":
-                    queryString = "abstract:" + searchField.getText();
-                    break;
-                default: // "Full text":
-                    queryString = "fulltext:" + searchField.getText();
+        sortAscButton.setOnAction(e -> {
+            if (searchResults != null) {
+                searchResults.sort(Comparator.comparing(doc -> doc.get("year")));
+                currentPage = 0;
+                updateResultsList(resultsList, prevButton, nextButton, queryString);
             }
+        });
 
-            if (!queryString.isEmpty()) {
-                try {
-                    Manager manager = new Manager(INDEX_DIR);
-                    manager.indexDocuments();
-                    manager.search(queryString);
-                    searchResults = manager.getSearcher().getMyList();
-                    manager.deleteIndexes();
-
-                    currentPage = 0;
-                    updateResultsList(resultsList, prevButton, nextButton, queryString);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+        sortDescButton.setOnAction(e -> {
+            if (searchResults != null) {
+                searchResults.sort(Comparator.comparing((Document doc) -> doc.get("year")).reversed());
+                currentPage = 0;
+                updateResultsList(resultsList, prevButton, nextButton, queryString);
             }
         });
 
@@ -114,8 +100,9 @@ public class gui extends Application {
         vboxDroplist.setPadding(new Insets(10));
 
         HBox navigationButtons = new HBox(10, prevButton, nextButton);
+        HBox sortButtons = new HBox(10, sortAscButton, sortDescButton);
 
-        vbox.getChildren().addAll(vboxDroplist, searchField, searchButton, resultsList, navigationButtons);
+        vbox.getChildren().addAll(vboxDroplist, searchField, searchButton, sortButtons, resultsList, navigationButtons);
 
         Scene scene = new Scene(vbox, 700, 400);
 
@@ -123,31 +110,59 @@ public class gui extends Application {
         primaryStage.show();
     }
 
+    private void handleSearch(ComboBox<String> comboBox, TextField searchField, ListView<VBox> resultsList, Button prevButton, Button nextButton) {
+        switch (comboBox.getSelectionModel().getSelectedItem()) {
+            case "Keyword":
+                queryString = searchField.getText();
+                break;
+            case "Author":
+                queryString = "author:" + searchField.getText();
+                break;
+            case "Title":
+                queryString = "title:" + searchField.getText();
+                break;
+            case "Year":
+                queryString = "year:" + searchField.getText();
+                break;
+            case "Abstract":
+                queryString = "abstract:" + searchField.getText();
+                break;
+            default: // "Full text":
+                queryString = "fulltext:" + searchField.getText();
+        }
+
+        if (!queryString.isEmpty()) {
+            try {
+                Manager manager = new Manager(INDEX_DIR);
+                manager.indexDocuments();
+                manager.search(queryString);
+                searchResults = manager.getSearcher().getMyList(); // Ensure this returns List<Document>
+                manager.deleteIndexes();
+
+                currentPage = 0;
+                updateResultsList(resultsList, prevButton, nextButton, queryString);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
     private TextFlow createTextFlowWithHighlightedWord(String content, String wordToHighlight) {
         TextFlow textFlow = new TextFlow();
 
-        int lastIndex = 0;
-        int wordIndex;
+        // Split the content into parts using a case-insensitive approach
+        String[] parts = content.split("(?i)(" + Pattern.quote(wordToHighlight) + ")");
+        for (int i = 0; i < parts.length; i++) {
+            // Add non-highlighted text part
+            Text text = new Text(parts[i]);
+            textFlow.getChildren().add(text);
 
-        while ((wordIndex = content.indexOf(wordToHighlight, lastIndex)) >= 0) {
-            // Add the text before the highlighted word
-            if (lastIndex < wordIndex) {
-                Text textBefore = new Text(content.substring(lastIndex, wordIndex));
-                textFlow.getChildren().add(textBefore);
+            // Add highlighted text part, but not after the last part
+            if (i < parts.length - 1) {
+                Text highlightedText = new Text(wordToHighlight);
+                highlightedText.setFill(Color.RED);
+                textFlow.getChildren().add(highlightedText);
             }
-
-            // Add the highlighted word
-            Text highlightedText = new Text(wordToHighlight);
-            highlightedText.setFill(Color.YELLOW);
-            textFlow.getChildren().add(highlightedText);
-
-            lastIndex = wordIndex + wordToHighlight.length();
-        }
-
-        // Add the remaining text after the last highlighted word
-        if (lastIndex < content.length()) {
-            Text remainingText = new Text(content.substring(lastIndex));
-            textFlow.getChildren().add(remainingText);
         }
 
         return textFlow;
@@ -179,7 +194,7 @@ public class gui extends Application {
             abstractLink.setOnAction(event -> openAbstractWindow(abstractContent));
             fullTextLink.setOnAction(event -> openFullTextWindow(fullTextContent));
 
-            VBox vBox = new VBox(5, authorsLabel,yearLabel, titleLabel, titleText, abstractLink, fullTextLink);
+            VBox vBox = new VBox(5, authorsLabel, yearLabel, titleLabel, titleText, abstractLink, fullTextLink);
             resultsList.getItems().add(vBox);
         }
 
@@ -206,7 +221,6 @@ public class gui extends Application {
 
         Scene scene = new Scene(vbox, 700, 600); // Increase the size of the window
         abstractStage.setScene(scene);
-        abstractStage.setResizable(true);
         abstractStage.show();
     }
 
@@ -229,7 +243,6 @@ public class gui extends Application {
 
         Scene scene = new Scene(vbox, 700, 600); // Increase the size of the window
         fullTextStage.setScene(scene);
-        fullTextStage.setResizable(true);
         fullTextStage.show();
     }
 
