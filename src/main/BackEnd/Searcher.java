@@ -38,7 +38,7 @@ public class Searcher {
 
     public void search(String queryString) throws IOException, ParseException {
         Query query = parser.parse(queryString);
-        TopDocs results = searcher.search(query, 10);
+        TopDocs results = searcher.search(query, 200);
         System.out.println("results " + results.totalHits);
         saveSearchToHistory(queryString, results.totalHits.value);
         for (ScoreDoc hit : results.scoreDocs) {
