@@ -138,7 +138,7 @@ public class gui extends Application {
                 queryString = searchField.getText();
                 break;
             case "Author":
-                queryString = "author:" + searchField.getText();
+                queryString = "authors:" + searchField.getText();
                 break;
             case "Title":
                 queryString = "title:" + searchField.getText();
@@ -150,7 +150,7 @@ public class gui extends Application {
                 queryString = "abstract:" + searchField.getText();
                 break;
             default: // "Full text":
-                queryString = "fulltext:" + searchField.getText();
+                queryString = "full_text:" + searchField.getText();
         }
 
         if (!queryString.isEmpty()) {
@@ -336,7 +336,7 @@ public class gui extends Application {
         TextArea historyTextArea = new TextArea();
         historyTextArea.setEditable(false);
 
-        try (BufferedReader reader = new BufferedReader(new FileReader("D:\\pitoura\\search_history.txt"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(Paths.get("src/main/Data/search_history.txt").toString()))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 historyTextArea.appendText(line + "\n");
@@ -374,11 +374,10 @@ public class gui extends Application {
     }
 
     private void clearSearchHistory() throws IOException {
-        try (FileWriter writer = new FileWriter("D:\\pitoura\\search_history.txt")) {
+        try (FileWriter writer = new FileWriter(Paths.get("src/main/Data/search_history.txt").toString())) {
             writer.write("");
         }
     }
-
 
     public static void main(String[] args) {
         launch(args);

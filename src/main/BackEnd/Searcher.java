@@ -54,7 +54,7 @@ public class Searcher {
     }
 
     private void saveSearchToHistory(String query, long totalHits) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("D:\\pitoura\\search_history.txt", true))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(Paths.get("src/main/Data/search_history.txt").toString(), true))) {
             writer.write(LocalDateTime.now() + " - Query: " + query + " - Hits: " + totalHits);
             writer.newLine();
         } catch (IOException e) {
