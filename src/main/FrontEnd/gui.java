@@ -36,6 +36,7 @@ public class gui extends Application {
     private List<Document> searchResults;
     private int currentPage = 0;
     private Query query;
+    private ObservableList<String> originalOptions;
     String queryString;
     ComboBox<String> comboBox;
 
@@ -47,10 +48,10 @@ public class gui extends Application {
         searchField.setPromptText("Enter search query");
 
         comboBox = new ComboBox<>();
-        ObservableList<String> options = FXCollections.observableArrayList(
+        originalOptions = FXCollections.observableArrayList(
                 "Keyword", "Author", "Year", "Title", "Abstract", "Full text"
         );
-        comboBox.setItems(options);
+        comboBox.setItems(originalOptions);
         comboBox.setPromptText("Select Search By:");
         comboBox.setOnAction(event -> {
             String selectedOption = comboBox.getSelectionModel().getSelectedItem();
@@ -110,6 +111,9 @@ public class gui extends Application {
             }
         });
 
+
+
+
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(10));
 
@@ -120,7 +124,7 @@ public class gui extends Application {
         HBox sortButtons = new HBox(10, sortAscButton, sortDescButton);
         HBox historyButtonBox = new HBox(10, viewHistoryButton);
 
-        vbox.getChildren().addAll(vboxDroplist, searchField, searchButton, sortButtons, resultsList, navigationButtons,historyButtonBox);
+        vbox.getChildren().addAll(vboxDroplist, searchField, searchButton, sortButtons, resultsList, navigationButtons, historyButtonBox);
 
         Scene scene = new Scene(vbox, 700, 400);
 
@@ -374,6 +378,7 @@ public class gui extends Application {
             writer.write("");
         }
     }
+
 
     public static void main(String[] args) {
         launch(args);
