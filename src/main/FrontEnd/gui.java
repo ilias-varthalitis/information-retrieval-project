@@ -14,6 +14,9 @@ import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import org.apache.lucene.document.Document;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -60,6 +63,7 @@ public class gui extends Application {
         ListView<VBox> resultsList = new ListView<>();
         Button prevButton = new Button("Previous");
         Button nextButton = new Button("Next");
+        Button viewHistoryButton = new Button("View Search History");
 
         prevButton.setDisable(true);
         nextButton.setDisable(true);
@@ -98,6 +102,14 @@ public class gui extends Application {
             }
         });
 
+        viewHistoryButton.setOnAction(e -> {
+            try {
+                showSearchHistory();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(10));
 
@@ -106,8 +118,9 @@ public class gui extends Application {
 
         HBox navigationButtons = new HBox(10, prevButton, nextButton);
         HBox sortButtons = new HBox(10, sortAscButton, sortDescButton);
+        HBox historyButtonBox = new HBox(10, viewHistoryButton);
 
-        vbox.getChildren().addAll(vboxDroplist, searchField, searchButton, sortButtons, resultsList, navigationButtons);
+        vbox.getChildren().addAll(vboxDroplist, searchField, searchButton, sortButtons, resultsList, navigationButtons,historyButtonBox);
 
         Scene scene = new Scene(vbox, 700, 400);
 
@@ -310,6 +323,56 @@ public class gui extends Application {
         fullTextStage.setScene(scene);
         fullTextStage.setResizable(true);
         fullTextStage.show();
+    }
+
+    private void showSearchHistory() throws IOException {
+        Stage historyStage = new Stage();
+        historyStage.setTitle("Search History");
+
+        TextArea historyTextArea = new TextArea();
+        historyTextArea.setEditable(false);
+
+        try (BufferedReader reader = new BufferedReader(new FileReader("D:\\pitoura\\search_history.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                historyTextArea.appendText(line + "\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        ScrollPane scrollPane = new ScrollPane(historyTextArea);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPrefSize(600, 400);
+
+        Button closeButton = new Button("Close");
+        closeButton.setOnAction(e -> historyStage.close());
+
+        Button deleteButton = new Button("Delete History");
+        deleteButton.setOnAction(e -> {
+            try {
+                clearSearchHistory();
+                historyTextArea.clear();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        HBox buttonBox = new HBox(10, closeButton, deleteButton);
+
+        VBox vbox = new VBox(10, scrollPane, buttonBox);
+        vbox.setPadding(new Insets(10));
+
+        Scene scene = new Scene(vbox, 700, 600);
+        historyStage.setScene(scene);
+        historyStage.setResizable(true);
+        historyStage.show();
+    }
+
+    private void clearSearchHistory() throws IOException {
+        try (FileWriter writer = new FileWriter("D:\\pitoura\\search_history.txt")) {
+            writer.write("");
+        }
     }
 
     public static void main(String[] args) {
