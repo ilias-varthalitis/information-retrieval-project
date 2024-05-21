@@ -15,8 +15,12 @@ import javafx.stage.Stage;
 import org.apache.lucene.document.Document;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.regex.Pattern;
 
 import BackEnd.*;
@@ -24,12 +28,13 @@ import org.apache.lucene.search.Query;
 
 public class gui extends Application {
 
-    private static final String INDEX_DIR = "D:\\pitoura\\index"; // Update this path
+    private static final String INDEX_DIR = Paths.get("src/main/Data/index").toAbsolutePath().toString();//"D:\\pitoura\\index"; // Update this path
     private static final int RESULTS_PER_PAGE = 10;
     private List<Document> searchResults;
     private int currentPage = 0;
     private Query query;
     String queryString;
+    ComboBox<String> comboBox;
 
     @Override
     public void start(Stage primaryStage) throws IOException {
@@ -38,9 +43,9 @@ public class gui extends Application {
         TextField searchField = new TextField();
         searchField.setPromptText("Enter search query");
 
-        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox = new ComboBox<>();
         ObservableList<String> options = FXCollections.observableArrayList(
-                "Keyword", "Author", "Title", "Year", "Abstract", "Full text"
+                "Keyword", "Author", "Year", "Title", "Abstract", "Full text"
         );
         comboBox.setItems(options);
         comboBox.setPromptText("Select Search By:");
@@ -147,26 +152,6 @@ public class gui extends Application {
         }
     }
 
-    private TextFlow createTextFlowWithHighlightedWord(String content, String wordToHighlight) {
-        TextFlow textFlow = new TextFlow();
-
-        // Split the content into parts using a case-insensitive approach
-        String[] parts = content.split("(?i)(" + Pattern.quote(wordToHighlight) + ")");
-        for (int i = 0; i < parts.length; i++) {
-            // Add non-highlighted text part
-            Text text = new Text(parts[i]);
-            textFlow.getChildren().add(text);
-
-            // Add highlighted text part, but not after the last part
-            if (i < parts.length - 1) {
-                Text highlightedText = new Text(wordToHighlight);
-                highlightedText.setFill(Color.RED);
-                textFlow.getChildren().add(highlightedText);
-            }
-        }
-
-        return textFlow;
-    }
 
     private void updateResultsList(ListView<VBox> resultsList, Button prevButton, Button nextButton, String queryString) {
         resultsList.getItems().clear();
@@ -183,18 +168,61 @@ public class gui extends Application {
             String abstractContent = doc.get("abstract");
             String fullTextContent = doc.get("full_text");
 
-            TextFlow titleText = createTextFlowWithHighlightedWord(title, queryString);
+            TextFlow authorsTextFlow = stringToTextFlow(authors);
+            TextFlow yearTextFlow = stringToTextFlow(year);
+            TextFlow titleTextFlow = stringToTextFlow(title);
+            TextFlow abstractTextTextFlow = stringToTextFlow(abstractContent);
+            TextFlow fullTextTextFlow = stringToTextFlow(fullTextContent);
 
-            Label authorsLabel = new Label("Authors: " + authors);
-            Label yearLabel = new Label("Year: " + year);
-            Label titleLabel = new Label("Title: ");
+            //TextFlow authorsTextFlow = authors;//, yearTextFlow, titleTextFlow, abstractTextFlow, fulltextTextFlow;
+
+            /*if (!Objects.equals(comboBox.getSelectionModel().getSelectedItem(), "Keyword")) {
+
+                queryString = queryString.replaceFirst("^[^:]+:", "");
+            }
+            titleText = createTextFlowWithHighlightedWord(title, queryString);*/
+
+            switch (comboBox.getSelectionModel().getSelectedItem()) {
+                case "Keyword":
+                    authorsTextFlow = createTextFlowWithHighlightedWord(authors, queryString);
+                    yearTextFlow = createTextFlowWithHighlightedWord(year, queryString);
+                    titleTextFlow = createTextFlowWithHighlightedWord(title, queryString);
+                    abstractTextTextFlow = createTextFlowWithHighlightedWord(abstractContent, queryString);
+                    fullTextTextFlow = createTextFlowWithHighlightedWord(fullTextContent, queryString);
+                    break;
+                case "Year":
+                    queryString = queryString.replaceFirst("^[^:]+:", "");
+                    yearTextFlow = createTextFlowWithHighlightedWordNew(queryString);
+                    break;
+                case "Author":
+                    queryString = queryString.replaceFirst("^[^:]+:", "");
+                    authorsTextFlow = createTextFlowWithHighlightedWord(authors, queryString);
+                    break;
+                case "Title":
+                    queryString = queryString.replaceFirst("^[^:]+:", "");
+                    titleTextFlow = createTextFlowWithHighlightedWord(title, queryString);
+                    break;
+                case "Abstract":
+                    queryString = queryString.replaceFirst("^[^:]+:", "");
+                    abstractTextTextFlow = createTextFlowWithHighlightedWord(abstractContent, queryString);
+                    break;
+                case "Full text":
+                    queryString = queryString.replaceFirst("^[^:]+:", "");
+                    fullTextTextFlow = createTextFlowWithHighlightedWord(fullTextContent, queryString);
+                    break;
+            }
+
+
+            HBox hboxAuthors = new HBox(1, new Label("Authors:"), authorsTextFlow);
+            HBox hboxYear = new HBox(1, new Label("Year:"), yearTextFlow);
+            HBox hboxTitle = new HBox(1, new Label("Title:"), titleTextFlow);
             Hyperlink abstractLink = new Hyperlink("Abstract");
             Hyperlink fullTextLink = new Hyperlink("Full text");
 
             abstractLink.setOnAction(event -> openAbstractWindow(abstractContent));
             fullTextLink.setOnAction(event -> openFullTextWindow(fullTextContent));
 
-            VBox vBox = new VBox(5, authorsLabel, yearLabel, titleLabel, titleText, abstractLink, fullTextLink);
+            VBox vBox = new VBox(5, hboxAuthors, hboxYear, hboxTitle, abstractLink, fullTextLink);
             resultsList.getItems().add(vBox);
         }
 
@@ -202,11 +230,47 @@ public class gui extends Application {
         nextButton.setDisable((currentPage + 1) * RESULTS_PER_PAGE >= searchResults.size());
     }
 
-    private void openAbstractWindow(String abstractContent) {
+    private TextFlow stringToTextFlow(String content) {
+        TextFlow textFlow = new TextFlow();
+        Text text = new Text(content);
+        textFlow.getChildren().add(text);
+        return textFlow;
+    }
+
+    private TextFlow createTextFlowWithHighlightedWord(String content, String wordToHighlight) {
+        TextFlow textFlow = new TextFlow();
+
+        // Split the content into parts using a case-insensitive approach
+        String[] parts = content.split("(?i)(" + Pattern.quote(wordToHighlight) + ")");
+        for (int i = 0; i < parts.length; i++) {
+            // Add non-highlighted text part
+            Text text = new Text(parts[i]);
+            textFlow.getChildren().add(text);
+
+            // Add highlighted text part, but not after the last part
+            if (i < parts.length - 1) {
+                Text highlightedText = new Text(wordToHighlight);
+                highlightedText.setFill(Color.GREEN);
+                textFlow.getChildren().add(highlightedText);
+            }
+        }
+
+        return textFlow;
+    }
+
+    private TextFlow createTextFlowWithHighlightedWordNew(String wordToHighlight) {
+        TextFlow textFlow = new TextFlow();
+        Text highlightedText = new Text(wordToHighlight);
+        highlightedText.setFill(Color.GREEN);
+        textFlow.getChildren().add(highlightedText);
+        return textFlow;
+    }
+
+    private void openAbstractWindow(String abstractTextFlow) {
         Stage abstractStage = new Stage();
         abstractStage.setTitle("Abstract");
 
-        Label abstractLabel = new Label(abstractContent);
+        Label abstractLabel = new Label(abstractTextFlow);
         abstractLabel.setWrapText(true);
 
         ScrollPane scrollPane = new ScrollPane(abstractLabel);
@@ -221,6 +285,7 @@ public class gui extends Application {
 
         Scene scene = new Scene(vbox, 700, 600); // Increase the size of the window
         abstractStage.setScene(scene);
+        abstractStage.setResizable(true);
         abstractStage.show();
     }
 
@@ -243,6 +308,7 @@ public class gui extends Application {
 
         Scene scene = new Scene(vbox, 700, 600); // Increase the size of the window
         fullTextStage.setScene(scene);
+        fullTextStage.setResizable(true);
         fullTextStage.show();
     }
 

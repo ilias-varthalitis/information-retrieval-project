@@ -5,6 +5,8 @@ import org.apache.lucene.queryparser.classic.ParseException;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import javafx.scene.control.ListView;
 
@@ -12,6 +14,7 @@ public class Manager {
     private Indexer indexer;
     @Getter
     private Searcher searcher;
+    Path currentDir = Paths.get("").toAbsolutePath();
 
 
     public Manager(String indexPath) throws IOException {
@@ -20,18 +23,24 @@ public class Manager {
     }
 
     public void indexDocuments() throws IOException {
-        this.indexer.indexCSV("D:\\pitoura\\corpus.csv");
+        System.out.println(currentDir);
+        currentDir = Paths.get("src/main/Data/corpus.csv").toAbsolutePath();
+        System.out.println(currentDir);
+        this.indexer.indexCSV(currentDir.toString());
         this.indexer.close();
     }
 
     public void search(String query) throws IOException, ParseException {
-        this.searcher = new Searcher("D:\\pitoura\\index");
+        currentDir = Paths.get("src/main/Data/index").toAbsolutePath();
+        this.searcher = new Searcher(currentDir.toString());
         this.searcher.search(query);
     }
 
     public void deleteIndexes(){
-        File indexDir = new File("D:\\pitoura\\index");
+        currentDir = Paths.get("src/main/Data/index").toAbsolutePath();
+        File indexDir = new File(currentDir.toString());
         if (indexDir.exists()) {
+            System.out.println("Number of Files = " + indexDir.listFiles().length);
             for (File file : indexDir.listFiles()) {
                 file.delete();
             }
