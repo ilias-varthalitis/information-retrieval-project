@@ -1,10 +1,8 @@
 package BackEnd;
 
 import lombok.Getter;
-import org.apache.lucene.analysis.*;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.search.highlight.*;
 import org.apache.lucene.index.*;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
@@ -18,8 +16,6 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import javafx.scene.control.ListView;
-
 
 public class Searcher {
     private IndexSearcher searcher;

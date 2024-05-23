@@ -7,8 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import javafx.scene.control.ListView;
 
 public class Manager {
     private Indexer indexer;
@@ -47,19 +45,4 @@ public class Manager {
             indexDir.delete();
         }
     }
-
-    /*public static void main(String[] args) {
-        try {
-            Manager manager = new Manager("D:\\pitoura\\index");
-
-            manager.indexDocuments();
-
-            manager.search("title: recipe");
-
-            manager.deleteIndexes();
-
-        } catch (IOException | ParseException e) {
-            e.printStackTrace();
-        }
-    }*/
 }

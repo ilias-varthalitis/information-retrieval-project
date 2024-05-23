@@ -1,28 +1,21 @@
-**Introduction**
+**About**
 
-The aim of this project is to design and implement an information retrieval system for scientific articles. Using the Lucene
-library, an open-source toolkit for text search engines, the system will enable users to efficiently search through a collection of academic papers.
+This is a desktop app built with JavaFX, capable of searching for scientific papers. 
+It supports both search using a keyword and field specific search by selecting from the drop-down menu. 
+The user can also have access to their search history, delete it if they wish and 
+make a previously searched query again. Results are displayed in batches of 10 where
+the keyword is highlighted and can be sorted by year.
 
-**Corpus**
+**How to run**
+1. Download and extract the zip of the project to your PC.
+2. Open the project using Intellij
+3. Navigate to the FrontEnd package under src/main subfolder and run the main function in gui.java
 
-The corpus is a subset of the papers dataset. Our selection encompasses the title, year, abstract and full text fields. Additionally, we use the unique id to associate each paper with its respective author, allowing us to include the authors’ names
-into the corpus.
+**Data used**
 
-**Text analysis and index creation**
-
-For the text analysis we use the Standard Analyzer which provides us a lot of utilities such as the removal of uppercases
-and stopwords.To store our index files, we will use the FSDirectory class, which enables efficient storage on disk. Additionally we will use an IndexWriter object which is responsible for adding documents to the index.For that also we will
-need to use Lucene’s Document class.
-
-**Search**
-
-Our system will use Lucene’s QueryParser class for keyword-based searches. It will also offer field searches where users
-can search within specific fields such as the title, abstract, or full text of the documents. Additionally, it will maintain a
-search history which can be useful for more applications such as autocompletion and support searching by author’s names
-which is a separate field in the document index.
-
-**Result representation**
-
-Once we receive the ordered results from the search, we will display them using a graphical user interface (GUI) following
-a given set of rules. Our system will show 10 results per page with highlighted keywords in each result and the ability to
-reorder them based on the year that the paper was published.
+[This](https://www.kaggle.com/datasets/rowhitswami/nips-papers-1987-2019-updated/data?select=papers.csv)
+is the dataset that was used for the app. A python script helped us filter and extract
+200 randomly selected papers into a single corpus.csv file, found under the Data package
+in src/main subfolder. Therefore, we combine and keep only the columns we need from both
+CSVs from Kaggle into one file. The corpus was subsequently indexed using the Lucene 
+library and its APIs.

@@ -12,8 +12,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
+
 import org.apache.lucene.document.Document;
-import org.apache.lucene.search.Query;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -32,7 +32,6 @@ public class gui extends Application {
     private static final int RESULTS_PER_PAGE = 10;
     private List<Document> searchResults;
     private int currentPage = 0;
-    private Query query;
     private ObservableList<String> originalOptions;
     private ObservableList<String> historyOptions;
     private ComboBox<String> comboBox;
@@ -74,10 +73,9 @@ public class gui extends Application {
 
             if (querySubstring != null) {
                 searchField.setText(querySubstring);
-                handleHistorySearch(historyComboBox, searchField, resultsList, prevButton, nextButton);
+                handleHistorySearch(searchField, resultsList, prevButton, nextButton);
             }
         });
-        flag = false;
 
         Button searchButton = new Button("Search");
         Button sortAscButton = new Button("Sort by Year Ascending");
@@ -147,13 +145,15 @@ public class gui extends Application {
 
         vbox.getChildren().addAll(vboxDroplist, vboxHistory, searchField, searchButton, sortButtons, resultsList, navigationButtons, historyButtonBox);
 
-        Scene scene = new Scene(vbox, 700, 400);
+        Scene scene = new Scene(vbox, 800, 600);
 
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
     private void handleSearch(ComboBox<String> comboBox, TextField searchField, ListView<VBox> resultsList, Button prevButton, Button nextButton) {
+        flag = false;
+
         switch (comboBox.getSelectionModel().getSelectedItem()) {
             case "Keyword":
                 queryString = searchField.getText();
@@ -178,7 +178,7 @@ public class gui extends Application {
                 Manager manager = new Manager(INDEX_DIR);
                 manager.indexDocuments();
                 manager.search(queryString);
-                searchResults = manager.getSearcher().getMyList(); // Ensure this returns List<Document>
+                searchResults = manager.getSearcher().getMyList();
                 manager.deleteIndexes();
 
                 currentPage = 0;
@@ -189,63 +189,59 @@ public class gui extends Application {
         }
     }
 
-    private void handleHistorySearch(ComboBox<String> comboBox, TextField searchField, ListView<VBox> resultsList, Button prevButton, Button nextButton) {
+    private void handleHistorySearch(TextField searchField, ListView<VBox> resultsList, Button prevButton, Button nextButton) {
         flag = true;
         String historyField;
         String historyText;
-
-        Object selectedItem = comboBox.getSelectionModel().getSelectedItem();
 
         String selectedItemString = searchField.getText();
         int queryIndex = selectedItemString.indexOf("Query:");
 
         if (queryIndex != -1)
         {
-            // Extract the substring starting from the index of "Query:"
             String querySubstring = selectedItemString.substring(queryIndex);
-
-            // Find the index of the next space after "Query:"
             int spaceIndex = querySubstring.indexOf(" ", querySubstring.indexOf(" ") + 1);
 
-            // If space is found
             if (spaceIndex != -1) {
-                // Extract the substring starting from after "Query:" until the next space
-                String titleAndRecipe = querySubstring.substring(6, spaceIndex).trim();
-                if (!titleAndRecipe.contains(":")) {
+                String wholeString = querySubstring.substring(6, spaceIndex).trim();
+                if (!wholeString.contains(":")) {
                     historyField = "keyword";
-                    historyText = titleAndRecipe;
+                    historyText = wholeString;
                 } else {
 
-                    String[] parts = titleAndRecipe.split(":");
+                    String[] parts = wholeString.split(":");
                     historyField = parts[0].trim();
                     historyText = parts[1].trim();
                 }
-                switch (historyField.substring(0, 1).toUpperCase() + historyField.substring(1)) {
-                    case "Keyword":
-                        queryString = historyText;
-                        break;
-                    case "Author":
-                        queryString = "authors:" + historyText;
-                        break;
-                    case "Title":
-                        queryString = "title:" + historyText;
-                        break;
-                    case "Year":
-                        queryString = "year:" + historyText;
-                        break;
-                    case "Abstract":
-                        queryString = "abstract:" + historyText;
-                        break;
-                    default: // "Full text":
-                        queryString = "full_text:" + historyText;
+                if(historyField.equals("authors")){
+                    queryString = "authors:" + historyText;
+                }else{
+                    switch (historyField.substring(0, 1).toUpperCase() + historyField.substring(1)) {
+                        case "Keyword":
+                            queryString = historyText;
+                            break;
+                        case "Author":
+                            queryString = "authors:" + historyText;
+                            break;
+                        case "Title":
+                            queryString = "title:" + historyText;
+                            break;
+                        case "Year":
+                            queryString = "year:" + historyText;
+                            break;
+                        case "Abstract":
+                            queryString = "abstract:" + historyText;
+                            break;
+                        default: // "Full text":
+                            queryString = "full_text:" + historyText;
+                    }
                 }
-
                 if (!queryString.isEmpty()) {
                     try {
                         Manager manager = new Manager(INDEX_DIR);
                         manager.indexDocuments();
                         manager.search(queryString);
-                        searchResults = manager.getSearcher().getMyList(); // Ensure this returns List<Document>
+                        searchResults = manager.getSearcher().getMyList();
                         manager.deleteIndexes();
 
                         currentPage = 0;
@@ -255,14 +251,10 @@ public class gui extends Application {
                     }
                 }
 
-            }
-            else
-            {
+            }else {
                 System.out.println("Invalid selectedItem format");
             }
-        }
-         else
-        {
+        }else {
             System.out.println("Invalid selectedItem format");
         }
     }
@@ -302,22 +294,17 @@ public class gui extends Application {
             TextFlow authorsTextFlow = stringToTextFlow(authors);
             TextFlow yearTextFlow = stringToTextFlow(year);
             TextFlow titleTextFlow = stringToTextFlow(title);
-            TextFlow abstractTextTextFlow = stringToTextFlow(abstractContent);
-            TextFlow fullTextTextFlow = stringToTextFlow(fullTextContent);
 
             if(flag){
-                System.out.println("1");
                 switch (historyComboBox.getSelectionModel().getSelectedItem()) {
                     case "Keyword":
                         authorsTextFlow = createTextFlowWithHighlightedWord(authors, queryString);
                         yearTextFlow = createTextFlowWithHighlightedWord(year, queryString);
                         titleTextFlow = createTextFlowWithHighlightedWord(title, queryString);
-                        abstractTextTextFlow = createTextFlowWithHighlightedWord(abstractContent, queryString);
-                        fullTextTextFlow = createTextFlowWithHighlightedWord(fullTextContent, queryString);
                         break;
                     case "Year":
                         queryString = queryString.replaceFirst("^[^:]+:", "");
-                        yearTextFlow = createTextFlowWithHighlightedWordNew(queryString);
+                        yearTextFlow = createTextFlowWithHighlightedWordYear(queryString);
                         break;
                     case "Author":
                         queryString = queryString.replaceFirst("^[^:]+:", "");
@@ -329,27 +316,21 @@ public class gui extends Application {
                         break;
                     case "Abstract":
                         queryString = queryString.replaceFirst("^[^:]+:", "");
-                        abstractTextTextFlow = createTextFlowWithHighlightedWord(abstractContent, queryString);
                         break;
                     case "Full text":
                         queryString = queryString.replaceFirst("^[^:]+:", "");
-                        fullTextTextFlow = createTextFlowWithHighlightedWord(fullTextContent, queryString);
                         break;
                 }
-            }
-            else{
-                System.out.println("2");
+            } else{
                 switch (comboBox.getSelectionModel().getSelectedItem()) {
                     case "Keyword":
                         authorsTextFlow = createTextFlowWithHighlightedWord(authors, queryString);
                         yearTextFlow = createTextFlowWithHighlightedWord(year, queryString);
                         titleTextFlow = createTextFlowWithHighlightedWord(title, queryString);
-                        abstractTextTextFlow = createTextFlowWithHighlightedWord(abstractContent, queryString);
-                        fullTextTextFlow = createTextFlowWithHighlightedWord(fullTextContent, queryString);
                         break;
                     case "Year":
                         queryString = queryString.replaceFirst("^[^:]+:", "");
-                        yearTextFlow = createTextFlowWithHighlightedWordNew(queryString);
+                        yearTextFlow = createTextFlowWithHighlightedWordYear(queryString);
                         break;
                     case "Author":
                         queryString = queryString.replaceFirst("^[^:]+:", "");
@@ -361,16 +342,12 @@ public class gui extends Application {
                         break;
                     case "Abstract":
                         queryString = queryString.replaceFirst("^[^:]+:", "");
-                        abstractTextTextFlow = createTextFlowWithHighlightedWord(abstractContent, queryString);
                         break;
                     case "Full text":
                         queryString = queryString.replaceFirst("^[^:]+:", "");
-                        fullTextTextFlow = createTextFlowWithHighlightedWord(fullTextContent, queryString);
                         break;
                 }
             }
-
-
 
             HBox hboxAuthors = new HBox(1, new Label("Authors:"), authorsTextFlow);
             HBox hboxYear = new HBox(1, new Label("Year:"), yearTextFlow);
@@ -398,26 +375,20 @@ public class gui extends Application {
 
     private TextFlow createTextFlowWithHighlightedWord(String content, String wordToHighlight) {
         TextFlow textFlow = new TextFlow();
-
-        // Split the content into parts using a case-insensitive approach
         String[] parts = content.split("(?i)(" + Pattern.quote(wordToHighlight) + ")");
         for (int i = 0; i < parts.length; i++) {
-            // Add non-highlighted text part
             Text text = new Text(parts[i]);
             textFlow.getChildren().add(text);
-
-            // Add highlighted text part, but not after the last part
             if (i < parts.length - 1) {
                 Text highlightedText = new Text(wordToHighlight);
                 highlightedText.setFill(Color.GREEN);
                 textFlow.getChildren().add(highlightedText);
             }
         }
-
         return textFlow;
     }
 
-    private TextFlow createTextFlowWithHighlightedWordNew(String wordToHighlight) {
+    private TextFlow createTextFlowWithHighlightedWordYear(String wordToHighlight) {
         TextFlow textFlow = new TextFlow();
         Text highlightedText = new Text(wordToHighlight);
         highlightedText.setFill(Color.GREEN);
@@ -442,7 +413,7 @@ public class gui extends Application {
         VBox vbox = new VBox(10, scrollPane, cancelButton);
         vbox.setPadding(new Insets(10));
 
-        Scene scene = new Scene(vbox, 700, 600); // Increase the size of the window
+        Scene scene = new Scene(vbox, 700, 600);
         abstractStage.setScene(scene);
         abstractStage.setResizable(true);
         abstractStage.show();
@@ -465,7 +436,7 @@ public class gui extends Application {
         VBox vbox = new VBox(10, scrollPane, cancelButton);
         vbox.setPadding(new Insets(10));
 
-        Scene scene = new Scene(vbox, 700, 600); // Increase the size of the window
+        Scene scene = new Scene(vbox, 700, 600);
         fullTextStage.setScene(scene);
         fullTextStage.setResizable(true);
         fullTextStage.show();
