@@ -8,7 +8,7 @@ the keyword is highlighted and can be sorted by year.
 
 **How to run**
 1. Download and extract the zip of the project to your PC.
-2. Open the project using Intellij
+2. Open the project using Intellij, it requires Java version 15.
 3. Navigate to the FrontEnd package under src/main subfolder and run the main function in gui.java
 
 **Data used**
